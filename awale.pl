@@ -24,7 +24,7 @@ ajout :- asserta(score(j2_sauve, 0)).
 
 
 
-%======================================== Conditions d'arrêt ==========================================
+%======================================== Conditions d'arrêt ==========================================%
 
 /* Deux plateaux vides */
 fin_jeu(L1, L2, Score1, Score2, Gagnant) :- 
@@ -87,21 +87,6 @@ reinit :- set_etat(j1, [4,4,4,4,4,4]), set_state(j2, [4,4,4,4,4,4]),
 
 %=======================Affichage=====================%
 
-afficheSousEtatJoueur([]):- nl.
-afficheSousEtatJoueur([T|Q]) :- write(T), write('|'), afficheSousEtatJoueur(Q).
-
-afficheSousEtatAdversaire(L):- inverse(L, R), afficheSousEtatJoueur(R).
-
-afficheTiret(0):-!.
-afficheTiret(N):- write('- '), N1 is N-1, afficheTiret(N1).
-
-afficheEtat([Jo1, Jo2]):- afficheTiret(6), nl, 
-						afficheSousEtatAdversaire(Jo1), 
-						afficheTiret(6),  nl,
-						afficheSousEtatJoueur(Jo2),
-						afficheTiret(6), nl.		
-
-
 						
 /* Affiche le plateau de jeu et les scores */
 afficheJeu :-
@@ -120,7 +105,9 @@ afficheJeu :-
     (Score1 < 10 -> write('      |\n');
     write('     |\n')),
     write('------------------------------------------------------\n\n').
-	
+
+/* Vérifier que ca affiche bien les trucs de l'adversaire a linverse des trucs du joueurs. Sinon faire une procédure inverser et l'utiliser */
+
 afficheValeur(Liste, X) :- 
     X < 6 -> get(Liste, X, Valeur),
     write(Valeur),
@@ -150,9 +137,10 @@ nieme(N, [_|T], Z):- N > 0, N1 is N - 1, nieme(N1, T, Z).
 /*Mise à jour de l'etat du plateau d'un des deux joueurs*/
 set_etat(J, NouvelEtat) :- retract(etat(J, _)), assert(etat(J, NouvelEtat)).
 
-/* Sauvegarde  : nth0(?Index, ?List, ?Elem) retourne True qd Elem est le ième élément de la liste. Commence à 0.*/
+/* Sauvegarde  : nth0(?Index, ?List, ?Elem) retourne True qd Elem est le ième élément de la liste, commence à 0
+Ou utiliser nth1 pour que les indices commencent à 1 */
 get(Liste, Indice, Valeur) :- nth0(Indice, Liste, Valeur). 
-/* Ou utiliser nth1 pour que les indices commencent à 1 */
+
 
 /* Copie du plateau d'un des deux joueurs */
 etat_sauve(J, A) :- etat(J, T),
