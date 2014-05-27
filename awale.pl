@@ -35,6 +35,8 @@ reinit :- maj_etat(j1, [4,4,4,4,4,4]), maj_etat(j2, [4,4,4,4,4,4]),
 
 %======================================== Conditions d'arrêt ==========================================%
 
+/* Gagnant peut prendre la valeur '1' ou '2'. Gagnant est vrai si le gagnant est le 1 ou 2 envoyé en paramètre. Cette condition se verifie par le maximum, qui renvoie le gagnant. */
+
 /* Deux plateaux vides */
 fin_jeu(L1, L2, Score1, Score2, Gagnant) :- 
     jeu_valide(L1, L2, Score1, Score2),
@@ -58,36 +60,47 @@ fin_jeu(L1, L2, Score1, Score2, Gagnant) :-
     affame(L1),
     calcul_somme(L1, Resultat),
     Score1_bis is Score1 + Resultat,
-    maximum(Score2, Score1_bis, Gagnant).
+    maximum(Score1_bis, Score2, Gagnant).
 
 /* un joueur a un score > 24 */
 fin_jeu(L1, L2, Score1, Score2, Gagnant) :- 
     jeu_valide(L1, L2, Score1, Score2),
     Score1 > 24,
-    Gagnant is j1.
+    Gagnant is 1.
 
 fin_jeu(L1, L2, Score1, Score2, Gagnant) :- 
     jeu_valide(L1, L2, Score1, Score2),
     Score2 > 24,
-    Gagnant is j2.
+    Gagnant is 2.
 	
-/* verifie_fin(Joueur) */
+%verifie_fin(Joueur)
 
-maximum(A, B, 0):- A>B.
-maximum(A, B, 1):- A<B.
-maximum(A, A, 2).
+maximum(X1, X1, 0).
+maximum(X1, X2, 1):- X1 > X2.
+maximum(X1, X2, 2):- X1 < X2.
 
-/*jeu_valide(L1, L2, Score1, Score2) :- somme(calcul_somme(L1,_),somme(calcul_somme(L2,_),somme(Score1,Score2,_),_),48).*/
+jeu_valide(L1, L2, Score1, Score2) :- calcul_somme(L1, R1),
+									  calcul_somme(L2, R2),
+									  somme(Score1, Score2, RS),
+									  somme(R1, R2, RL),
+									  somme(RS, RL, 48).
 
 somme(A,B,C) :- C is (A+B).
 
 calcul_somme([],0).
-calcul_somme([X|R],N) :- calcul_somme(R,N1), N is N1+X.
+calcul_somme([T|Q],R) :- calcul_somme(Q,R1), R is R1+T.
 
 
 cote_vide(J) :- calcul_somme(J,0).
 
 affame(A) :- \+cote_vide(A), cote_vide(_).
+
+
+/* Reinitialise le jeu */
+reinit :- maj_etat(j1, [4,4,4,4,4,4]), maj_etat(j2, [4,4,4,4,4,4]),
+		  maj_score(j1, 0), maj_score(j2, 0),
+		  retract(joueur_courant(_)), assert(joueur_courant(j1)),
+		  montrer_jeu.
 
 
 
