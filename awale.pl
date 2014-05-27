@@ -2,6 +2,10 @@
 
 %======================================= Initialisation ==============================================
 
+/* Pour utiliser des bibliothèques */
+bleu :- module(ansi_term, [ansi_format([fg(cyan)])/3]).
+vert :- module(ansi_term, [ansi_format([fg(green)])/3]).
+rouge :- module(ansi_term, [ansi_format([fg(red)])/3]).
 
 /* Pour établie la base en dynamique */
 :- dynamic(etat/2).
@@ -21,6 +25,11 @@ ajout :- asserta(etat(j2_sauve, [4,4,4,4,4,4])).
 ajout :- asserta(score(j1_sauve, 0)).
 ajout :- asserta(score(j2_sauve, 0)). 
 
+/* Reinitialise le jeu */
+reinit :- maj_etat(j1, [4,4,4,4,4,4]), maj_etat(j2, [4,4,4,4,4,4]),
+		  maj_score(j1, 0), maj_score(j2, 0),
+		  retract(joueur_courant(_)), assert(joueur_courant(j1)),
+		  affiche_jeu.
 
 
 
@@ -61,6 +70,8 @@ fin_jeu(L1, L2, Score1, Score2, Gagnant) :-
     jeu_valide(L1, L2, Score1, Score2),
     Score2 > 24,
     Gagnant is j2.
+	
+/* verifie_fin(Joueur) */
 
 maximum(A, B, 0):- A>B.
 maximum(A, B, 1):- A<B.
@@ -78,11 +89,6 @@ cote_vide(J) :- calcul_somme(J,0).
 
 affame(A) :- \+cote_vide(A), cote_vide(_).
 
-/* Reinitialise le jeu */
-reinit :- maj_etat(j1, [4,4,4,4,4,4]), maj_etat(j2, [4,4,4,4,4,4]),
-		  maj_score(j1, 0), maj_score(j2, 0),
-		  retract(joueur_courant(_)), assert(joueur_courant(j1)),
-		  montrer_jeu.
 
 
 %=======================Affichage=====================%
@@ -182,6 +188,50 @@ maj_joueur :- joueur_courant(J),
 				retract(joueur_courant(_)),
 				assert(joueur_courant(j1)).
 				
+
+/* Gagne 2 graines */
+gagne_deux(Etat, NouvelEtat, Graine, 2, AjoutScore) :-
+		maj(Etat, Graine, 0, TmpNouvelEtat),
+		NouvelEtat = TmpNouvelEtat,
+		AjoutScore = 2.
+		
+/* Gagne 3 graines */
+gagne_trois(Etat, NouvelEtat, Graine, 3, AjoutScore) :-
+		maj(Etat, Graine, 0, TmpNouvelEtat),
+		NouvelEtat = TmpNouvelEtat,
+		AjoutScore = 3.
+		
+/* Tour normal */
+gagne_rien(Etat, NouvelEtat, _, _, AjoutScore) :-
+    NouvelEtat = Etat,
+    AjoutScore = 0.
+	
+/* Pour tout le tour */
+gagne(Etat, NouvelEtat, _, _, AjoutScore):- gagne_deux ; gagne_rien ; gagne_trois.
+
+/* On checke la case d'avant */
+gagne_avant(Etat, NouvelEtat, Graine, AjoutScore) :-
+    position(Etat, Graine, Trou),
+    gagne(Etat, NouvelEtat, Graine, Trou, AjoutScore).
+	
+/* On verifie que le joueur ne joue pas une case vide */
+case_vide(Graine) :- etat(j1, Etat),
+					 position(Etat, Graine, Valeur),
+					 Valeur > 0 -> true;
+					 write('Vous ne pouvez jouer une case vide!'), fail.
+
+
+
+%================= Pour jouer ====================%
+				
+debut1 :- write('\nBienvenue dans le jeu de l\'awale !\n\n').
+debut2 :- affiche_jeu.
+
+
+%================= Informations ====================%
+
+				
+
 				
 
 
