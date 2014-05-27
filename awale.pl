@@ -112,7 +112,8 @@ nieme(N, [_|T], Z):- N > 0, N1 is N - 1, nieme(N1, T, Z).
 set_etat(J, NouvelEtat) :- retract(etat(J, _)), assert(etat(J, NouvelEtat)).
 
 /* Sauvegarde  : nth0(?Index, ?List, ?Elem) retourne True qd Elem est le ième élément de la liste. Commence à 0.*/
-get(Liste, Indice, Valeur) :- nth0(Indice, Liste, Valeur).
+get(Liste, Indice, Valeur) :- nth0(Indice, Liste, Valeur). 
+/* Ou utiliser nth1 pour que les indices commencent à 1 */
 
 /* Copie du plateau d'un des deux joueurs */
 etat_sauve(J, A) :- etat(J, T),
