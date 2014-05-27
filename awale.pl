@@ -71,7 +71,7 @@ maximum(A, A, 2).
 somme(A,B,C) :- C is (A+B).
 
 calcul_somme([],0).
-calcul_somme([X|R],N) :- calcul_somme(R,N1), N is N1+X.
+calcul_somme([T|Q],R) :- calcul_somme(Q,R1), R is R1+T.
 
 
 cote_vide(J) :- calcul_somme(J,0).
@@ -79,7 +79,7 @@ cote_vide(J) :- calcul_somme(J,0).
 affame(A) :- \+cote_vide(A), cote_vide(_).
 
 /* Reinitialise le jeu */
-reinit :- set_etat(j1, [4,4,4,4,4,4]), set_state(j2, [4,4,4,4,4,4]),
+reinit :- set_etat(j1, [4,4,4,4,4,4]), set_etat(j2, [4,4,4,4,4,4]),
 		  set_score(j1, 0), set_score(j2, 0),
 		  retract(joueur_courant(_)), assert(joueur_courant(j1)),
 		  draw_game.
