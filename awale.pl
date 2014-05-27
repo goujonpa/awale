@@ -1,25 +1,25 @@
 %Projet IA02 : Creation d'un jeu d'awale en langage prolog.
 
-%======================================= initialisation ==============================================
+%======================================= Initialisation ==============================================
 
 
-/* va changer plus tard */
+/* Pour établie la base en dynamique */
 :- dynamic(etat/2).
 :- dynamic(score/2).
 :- dynamic(joueur_courant/1).
 
-/* etats initiaux */
+/* Etats initiaux */
 etat(j1, [4,4,4,4,4,4]).
 etat(j2, [4,4,4,4,4,4]).
 score(j1,0).
 score(j2,0).
 joueur_courant(j1).
 
-/* sauvegardes 
-:- initialization(etat(j1_sauve, [4,4,4,4,4,4])).
-:- initialization(etat(j2_sauve, [4,4,4,4,4,4])).
-:- initialization(score(j1_sauve, 0)).
-:- initialization(score(j2_sauve, 0)). */
+/* Sauvegardes  */
+ajout :- asserta(etat(j1_sauve, [4,4,4,4,4,4])).
+ajout :- asserta(etat(j2_sauve, [4,4,4,4,4,4])).
+ajout :- asserta(score(j1_sauve, 0)).
+ajout :- asserta(score(j2_sauve, 0)). 
 
 
 
@@ -66,10 +66,23 @@ maximum(A, B, 0):- A>B.
 maximum(A, B, 1):- A<B.
 maximum(A, A, 2).
 
-/*jeu_valide().
-cote_vide().
-affame().
-calcul_somme().*/
+/*jeu_valide(L1, L2, Score1, Score2) :- somme(calcul_somme(L1,_),somme(calcul_somme(L2,_),somme(Score1,Score2,_),_),48).*/
+
+somme(A,B,C) :- C is (A+B).
+
+calcul_somme([],0).
+calcul_somme([X|R],N) :- calcul_somme(R,N1), N is N1+X.
+
+
+cote_vide(J) :- calcul_somme(J,0).
+
+affame(A) :- \+cote_vide(A), cote_vide(_).
+
+/* Reinitialise le jeu */
+reinit :- set_etat(j1, [4,4,4,4,4,4]), set_state(j2, [4,4,4,4,4,4]),
+		  set_score(j1, 0), set_score(j2, 0),
+		  retract(joueur_courant(_)), assert(joueur_courant(j1)),
+		  draw_game.
 
 
 %=======================Affichage=====================%
@@ -82,14 +95,40 @@ afficheSousEtatAdversaire(L):- inverse(L, R), afficheSousEtatJoueur(R).
 afficheTiret(0):-!.
 afficheTiret(N):- write('- '), N1 is N-1, afficheTiret(N1).
 
-afficheEtat([H, B]):- afficheTiret(6), nl, 
-						afficheSousEtatAdversaire(H), 
+afficheEtat([Jo1, Jo2]):- afficheTiret(6), nl, 
+						afficheSousEtatAdversaire(Jo1), 
 						afficheTiret(6),  nl,
-						afficheSousEtatJoueur(B),
+						afficheSousEtatJoueur(Jo2),
 						afficheTiret(6), nl.		
 
 
 						
+/* Affiche le plateau de jeu et les scores */
+afficheJeu :-
+    etat(j1, Etat1), etat(j2, Etat2),
+    score(j1, Score1), score(j2, Score2),
+    write('\n'),
+    write('------------------------- PLATEAU DE JEU ------------------------- SCORE -------\n'),
+    write('------------------------------------------------------\n'),
+    write('|  Joueur 2  |  '),
+    afficheValeur(Etat2, 0), write(Score2),
+    (Score2 < 10 -> write('      |\n');
+	write('     |\n')),
+    write('------------------------------------------------------\n'),
+    write('|  Joueur 1  |  '),
+    afficheValeur(Etat1, 0), write(Score1),
+    (Score1 < 10 -> write('      |\n');
+    write('     |\n')),
+    write('------------------------------------------------------\n\n').
+	
+afficheValeur(Liste, X) :- 
+    X < 6 -> get(Liste, X, Valeur),
+    write(Valeur),
+	(Valeur < 10 -> write('  |  ');
+    write(' |  ')), N is X + 1,
+    afficheValeur(Liste, N);
+    write('          |      ').
+
 %===========Fonctions de base==========%
 
 inverse([],[]).
@@ -145,3 +184,10 @@ set_joueur :- joueur_courant(J),
 				assert(joueur_courant(j2));
 				retract(joueur_courant(_)),
 				assert(joueur_courant(j1)).
+				
+				
+/* Copier une liste */
+copie(L1, L2) :- sous_copie(L1,L2).
+sous_copie([],[]).
+sous_copie([T|Q],[T|QR]) :- sous_copie(Q,QR).
+
